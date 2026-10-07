@@ -1,0 +1,14 @@
+SELECT 
+    SUM(price)*1.0/ COUNT(DISTINCT user_id) AS arpu
+FROM dbo.Nov_2019
+WHERE event_type = 'purchase';
+
+SELECT
+    SUM(price)*1.0/ COUNT(DISTINCT user_session) AS aov
+FROM dbo.Nov_2019
+WHERE event_type = 'purchase';
+
+SELECT
+    (SUM(price)*1.0/ COUNT(DISTINCT user_id)) / (SUM(price)*1.0/ COUNT(DISTINCT user_session)) AS basket_size
+FROM dbo.Nov_2019
+WHERE event_type = 'purchase';
