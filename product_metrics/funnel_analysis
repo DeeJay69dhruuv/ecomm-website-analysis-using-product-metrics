@@ -1,0 +1,48 @@
+-- OVERALL funnel analysis of the entire 30 day dataset
+WITH main_table AS(
+    SELECT
+        COUNT(DISTINCT CASE WHEN event_type = 'view' THEN user_id  END) AS view_event,
+        COUNT(DISTINCT CASE WHEN event_type = 'cart' THEN user_id  END) AS cart_event,
+        COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN user_id END) AS purchase_event
+    FROM dbo.Nov_2019
+) 
+SELECT 
+    cart_event*100.0 / view_event AS drop_off_view_to_cart,
+    purchase_event*100.0/ cart_event AS drop_off_cart_to_purchase,
+    purchase_event*100.0/ view_event AS conversion_measure
+FROM main_table;
+
+
+-- FUNNEL analysis by Category to pinpoint the worst and best category
+WITH table_by_category AS (
+    SELECT
+        category_id,
+        category_code,
+        COUNT(DISTINCT CASE WHEN event_type = 'view' THEN user_id END) AS views,
+        COUNT(DISTINCT CASE WHEN event_type = 'cart' THEN user_id END) AS carts,
+        COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN user_id END) AS purchases
+    FROM dbo.Nov_2019
+    GROUP BY category_id, category_code
+    HAVING COUNT(DISTINCT CASE WHEN event_type = 'cart' THEN user_id  END)  > 0 
+    AND
+    COUNT(DISTINCT CASE WHEN event_type = 'purchase' THEN user_id  END) > 0
+
+)
+-- SELECT
+--     category_id,
+--     category_code,
+--     carts*100.0 / views AS drop_off_view_to_cart,
+--     purchases*100.0/ carts AS drop_off_cart_to_purchase,
+--     purchases*100.0/ views AS conversion_measure
+-- FROM table_by_category
+
+
+-- THE WORST category - shoes has less than 5% activation ratio, acquire is good but activation is very low in case of shoes
+SELECT
+    category_id,
+    category_code,
+    carts*100.0 / views AS drop_off_view_to_cart,
+    purchases*100.0/ carts AS drop_off_cart_to_purchase,
+    purchases*100.0/ views AS conversion_measure
+FROM table_by_category
+WHERE category_code LIKE '%shoe%';

@@ -1,1 +1,20 @@
-
+WITH select_max AS (
+    SELECT
+        DAY(event_time) AS day_in_nov,
+        COUNT(DISTINCT user_id) AS daily_active_users,
+        COUNT(DISTINCT user_session) AS session_volume
+    FROM dbo.Nov_2019
+    GROUP BY DAY(event_time)
+)
+-- SELECT
+--     day_in_nov,
+--     (daily_active_users*100.0)/MAX(daily_active_users) OVER () AS normalised
+-- FROM select_max
+-- ORDER BY day_in_nov
+SELECT
+    day_in_nov,
+    daily_active_users,
+    session_volume,
+    session_volume*1.0/ daily_active_users AS user_obsession
+FROM select_max
+ORDER BY day_in_nov
